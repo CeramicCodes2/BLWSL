@@ -13,11 +13,11 @@ from settings import Merger
 
 ss = Merger.save_settings(
 SL.LevelConfig(
-    path=r'D:\scripts\python\BLWSL\settings\test.json',
+    path=r'D:\scripts\python\BLWSL\settings\levels.json',
     levels=
     {
-    1:SL.Level(scrypt_n_mode=1,scrypt_r_mode=2,scrypt_p_mode=2),
-    2:SL.Level(scrypt_n_mode=1,scrypt_r_mode=2,scrypt_p_mode=2),
+    1:SL.Level(n=16384,r=8,p=1),
+    2:SL.Level(n=1048576,r=8,p=1),
     }
     ))
 ss.save()

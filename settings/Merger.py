@@ -1,6 +1,7 @@
 from json import loads
 from os import urandom
 from hashlib import scrypt
+from . import PATH
 class save_settings:
     def __init__(self,dataType) -> None:
         self.dataType = dataType
@@ -20,22 +21,22 @@ class save_settings:
             return res
         elif format == 'binary':
             return res
-    @staticmethod
-    def saveSalts(account_id:int,salt:bytes,sep=':') -> None:
-        with open('file_salts.conf','ab') as abf:
-            abf.write(bytes(account_id) + ':' + salt)
 class savePassword:
     def __init__(self,plane_password:bytes,level:int,path:str) -> None:
         self.__password = plane_password
         self.__level = level
-        self.__levels = save_settings.loads('levels.json')
+        self.__levels = save_settings.loads(PATH)['levels']
         self.__path = path
     def kdfScrypt(self) -> bytes:
-        resp = self.__levels.get(self.__level)
+        resp = self.__levels.get(str(self.__level),None)
         if not(resp):
             raise ValueError('Level security not in Key Dict FATAL ERROR !')
         return scrypt(self.__password,**resp)
     def savePassword(self):
         with open(self.__path,'wb') as wbf:
             wbf.write(self.kdfScrypt())
-        pass
+    @staticmethod
+    def saveSalts(account_id:int,salt:bytes,sep=':') -> None:
+        with open('file_salts.conf','ab') as abf:
+            abf.write(bytes(account_id) + ':' + salt)
+    def search_password

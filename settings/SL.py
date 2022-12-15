@@ -2,9 +2,9 @@ from . import BaseModel
 from pydantic import validator,ValidationError
 #https://cryptobook.nakov.com/mac-and-key-derivation/password-encryption
 class Level(BaseModel):
-    scrypt_n_mode:int
-    scrypt_r_mode:int
-    scrypt_p_mode:int
+    n:int
+    r:int
+    p:int
 class LevelConfig(BaseModel):
     path:str
     levels:dict[int,Level]
