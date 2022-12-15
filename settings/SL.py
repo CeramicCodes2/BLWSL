@@ -6,6 +6,7 @@ class Level(BaseModel):
     scrypt_r_mode:int
     scrypt_p_mode:int
 class LevelConfig(BaseModel):
+    path:str
     levels:dict[int,Level]
     @validator('levels')
     def valLevels(cls,v):
