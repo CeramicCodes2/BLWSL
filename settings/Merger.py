@@ -39,4 +39,6 @@ class savePassword:
     def saveSalts(account_id:int,salt:bytes,sep=':') -> None:
         with open('file_salts.conf','ab') as abf:
             abf.write(bytes(account_id) + ':' + salt)
-    def search_password
+    @staticmethod
+    def search_password():
+        pass
