@@ -1,4 +1,5 @@
 from . import BaseModel
+from . import PATH
 from pydantic import validator,ValidationError
 #https://cryptobook.nakov.com/mac-and-key-derivation/password-encryption
 class Level(BaseModel):
@@ -6,7 +7,7 @@ class Level(BaseModel):
     r:int
     p:int
 class LevelConfig(BaseModel):
-    path:str
+    path:str = PATH
     levels:dict[int,Level]
     @validator('levels')
     def valLevels(cls,v):
