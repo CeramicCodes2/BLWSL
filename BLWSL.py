@@ -20,8 +20,8 @@ from pydantic import BaseSettings
 #
 # 
 
-#LS = LoginSettings(save_path=r'password30.txt',user=User(account_id=1,name='yuniqua',password=b'hello world11',scrypt_level_security=1,save_path=r'password.txt'))
-#save_settings(LS,distinct='_' + LS.user.name,format='env',perm='a')
+LS = LoginSettings(save_path=r'password30.txt',user=User(account_id=1,name='yuniqua',password=b'hello world11',scrypt_level_security=1,save_path=r'password.txt'))
+save_settings(LS,distinct='_' + LS.user.name,format='env',perm='a')
 
 
 #print(environ['LOGINSETTINGS_YUNIQUA'])
@@ -29,8 +29,8 @@ from pydantic import BaseSettings
 #print(LoadLoginSettings().dict())
 #load_dotenv(r'C:\Users\ispi2\OneDrive\Documents\projects\BLWSL\settings\login.env')
 #print(environ['LOGINSETTINGS_ACTIVEUSERS'])
-sen = settings().dict()
-print(sen)
+#sen = settings().dict()
+#print(sen)
 
 #
 # conf = load_dotenv(r'C:\Users\ispi2\OneDrive\Documents\projects\BLWSL\settings\login.env')#

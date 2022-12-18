@@ -20,6 +20,7 @@ class LoginSettings(BaseModel):
         salt=salt,account_id=v.account_id).savePassword()
         # save the kd password
         return v
+
 class settings(BaseSettings):
     #ALLOWED_USERS:list(str) = 
     activeusers:list[str]

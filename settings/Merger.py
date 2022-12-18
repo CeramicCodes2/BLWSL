@@ -1,6 +1,6 @@
 from json import loads
 from hashlib import scrypt
-from . import PATH
+from . import PATH,ACTIVE_USERS
 from os.path import isfile
 class save_settings:
     def __init__(self,dataType,distinct='',format='json',perm='w') -> None:
@@ -34,6 +34,21 @@ class save_settings:
             return res
         elif format == 'binary':
             return res
+class saveActiveUsers:
+    def __init__(self) -> None:
+        self.__active_users = []
+    def openActiveUsersFile(self):
+        self.__awrf = open(ACTIVE_USERS,'a+')
+    def __del__(self,*args,**kwargs):
+        self.__awrf.close()
+        
+        # se cierra el archivo cuando se elimine el objeto
+        # asi en lugar de estar abriendo y abriendo por cada operacion
+        # solo se abre una vez
+    @property
+    def active_users(self):
+        
+        self.__active_users.append()
 class savePassword:
     def __init__(self,plane_password:bytes,level:int,path:str,salt:bytes,account_id:int) -> None:
         self.__password = plane_password
