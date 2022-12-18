@@ -3,11 +3,12 @@ from hashlib import scrypt
 from . import PATH
 from os.path import isfile
 class save_settings:
-    def __init__(self,dataType,distinct='',format='json') -> None:
+    def __init__(self,dataType,distinct='',format='json',perm='w') -> None:
         '''
         distinct -> un campo que distinguira uno de otra
         configuracion
         '''
+        self.perm = perm 
         self.distinct = distinct
         self.dataType = dataType
         self.data:str = self.dataType.json()
@@ -16,13 +17,13 @@ class save_settings:
         else:
             self.save()
     def save_json(self):
-        with open(self.dataType.path,'w') as wf:
+        with open(self.dataType.path,self.perm) as wf:
             # eliminamos el path del esquema
             wf.write(self.data)   
     def save(self):
-        with open(self.dataType.path,'a') as wf:
+        with open(self.dataType.path,self.perm) as wf:
             # eliminamos el path del esquema
-            wf.write(f'{self.dataType.__repr_name__()}{self.distinct}={self.data}')
+            wf.write(f'{self.dataType.__repr_name__()}{self.distinct}={self.data}\n')
     @staticmethod
     def loads(filename,format='json',perm='r') ->dict:
         with open(filename,perm) as rddata:

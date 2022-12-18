@@ -1,10 +1,10 @@
 from . import BaseModel
 from .User import User
 from os import urandom
-from pydantic import validator,ValidationError
+from pydantic import validator,ValidationError,BaseSettings
 from .Merger import savePassword
 from . import PATH_LOGIN
-from pydantic import BaseSettings
+
 class LoginSettings(BaseModel):
     path:str = PATH_LOGIN
     user:User
@@ -20,7 +20,18 @@ class LoginSettings(BaseModel):
         salt=salt,account_id=v.account_id).savePassword()
         # save the kd password
         return v
-class LoadLoginSettings(BaseSettings):
-    login:LoginSettings
+class settings(BaseSettings):
+    #ALLOWED_USERS:list(str) = 
+    activeusers:list[str]
     class Config:
-        env_file= PATH_LOGIN
+        env_prefix = 'LOGINSETTINGS_'
+        env_file = r'C:\Users\ispi2\OneDrive\Documents\projects\BLWSL\settings\login.env'
+        @classmethod
+        def parse_env_var(cls,field_name:str,raw_val:str):
+            if field_name == 'activeusers':
+                try:
+                    res = cls.json_loads(raw_val)
+                except:
+                    raise NameError(' no se puede decodificar el formato json')
+                return res
+            return cls.json_loads(raw_val)
