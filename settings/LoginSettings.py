@@ -2,7 +2,7 @@ from . import BaseModel
 from .User import User
 from os import urandom
 from pydantic import validator,ValidationError,BaseSettings
-from .Merger import savePassword
+from .Merger import savePassword,saveActiveUsers
 from . import PATH_LOGIN
 
 class LoginSettings(BaseModel):
@@ -21,18 +21,32 @@ class LoginSettings(BaseModel):
         # save the kd password
         return v
 
-class settings(BaseSettings):
-    #ALLOWED_USERS:list(str) = 
-    activeusers:list[str]
-    class Config:
-        env_prefix = 'LOGINSETTINGS_'
-        env_file = r'C:\Users\ispi2\OneDrive\Documents\projects\BLWSL\settings\login.env'
-        @classmethod
-        def parse_env_var(cls,field_name:str,raw_val:str):
-            if field_name == 'activeusers':
-                try:
-                    res = cls.json_loads(raw_val)
-                except:
-                    raise NameError(' no se puede decodificar el formato json')
-                return res
-            return cls.json_loads(raw_val)
+class Config:
+    __active_users = saveActiveUsers().active_users
+    env_prefix = 'LOGINSETTINGS_'
+    env_file = PATH_LOGIN
+    @classmethod
+    def parse_env_var(cls,field_name:str,raw_val:str):
+        if field_name in cls.__active_users:
+            try:
+                res = cls.json_loads(raw_val)
+            except:
+                raise NameError(' no se puede decodificar el formato json')
+            return res
+        return cls.json_loads(raw_val)
+def createSettingsLoader() -> type:
+    
+    dct_users ={
+        'Config':Config
+        }
+    users = ''.join(x + ':dict[str,str | dict[str,str | int]]\n' for x in saveActiveUsers().active_users)
+    code = f"""
+{users}
+    """
+    exec(code,dct_users)
+    se = type('settings',
+         (BaseSettings,)
+         ,
+         dct_users
+    )
+    return se

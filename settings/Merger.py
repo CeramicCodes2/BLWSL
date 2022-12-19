@@ -1,4 +1,4 @@
-from json import loads
+from json import loads,dumps
 from hashlib import scrypt
 from . import PATH,ACTIVE_USERS
 from os.path import isfile
@@ -11,7 +11,7 @@ class save_settings:
         self.perm = perm 
         self.distinct = distinct
         self.dataType = dataType
-        self.data:str = self.dataType.json()
+        self.data:str = self.dataType.json(exclude={'user':{'password'},'path':True})
         if format =='json':
             self.save_json()
         else:
@@ -37,18 +37,39 @@ class save_settings:
 class saveActiveUsers:
     def __init__(self) -> None:
         self.__active_users = []
-    def openActiveUsersFile(self):
-        self.__awrf = open(ACTIVE_USERS,'a+')
-    def __del__(self,*args,**kwargs):
-        self.__awrf.close()
-        
-        # se cierra el archivo cuando se elimine el objeto
-        # asi en lugar de estar abriendo y abriendo por cada operacion
-        # solo se abre una vez
+    def comprobateFile(self,raiseError=True) -> None | bool:
+        if not(isfile(ACTIVE_USERS)):
+            if raiseError:
+                raise NameError('NO EXISTE EL ARCHIVO DE USUARIOS ACTIVOS')
+                # si raiseError es false no se levantara una excepcion solo false
+            else:
+                return False
     @property
-    def active_users(self):
+    def active_users(self) -> list[str]:
+        '''
+        read active users
+        '''
+        with open(ACTIVE_USERS,'r') as rdf: 
+            au = loads(rdf.read())
+            self.__active_users = au
+        return au
+            
+    @active_users.setter
+    def active_users(self,user:str) -> None:
+        '''
+        append active users
+        '''
+        # self.comprobateFile() no necesario 
+        with open(ACTIVE_USERS,'w+') as rdf:
+            if self.comprobateFile(raiseError=False):
+                au = []# se crea una lista vacia
+            else:
+                au = loads(rdf.read())
+            rdf.seek(0)# me muevo a la posicion 0 para
+            # sobre escribir todos los datos
+            rdf.write(dumps(au.append(user)))
         
-        self.__active_users.append()
+        
 class savePassword:
     def __init__(self,plane_password:bytes,level:int,path:str,salt:bytes,account_id:int) -> None:
         self.__password = plane_password
