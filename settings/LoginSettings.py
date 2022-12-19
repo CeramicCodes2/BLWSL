@@ -7,6 +7,7 @@ from . import PATH_LOGIN
 
 class LoginSettings(BaseModel):
     path:str = PATH_LOGIN
+    account_locket:bool
     user:User
     @validator('user')
     def save_password(cls,v):
@@ -39,7 +40,7 @@ def createSettingsLoader() -> type:
     dct_users ={
         'Config':Config
         }
-    users = ''.join(x + ':dict[str,str | dict[str,str | int]]\n' for x in saveActiveUsers().active_users)
+    users = ''.join(x + ':dict[str,str | dict[str,str | int]]\n' for x in saveActiveUsers().active_users.keys())
     code = f"""
 {users}
     """

@@ -55,20 +55,24 @@ class saveActiveUsers:
         return au
             
     @active_users.setter
-    def active_users(self,user:str) -> None:
+    def active_users(self,user:dict[str,int]) -> None:
         '''
         append active users
+        user,account_id:int
+        {'ivan':1}
         '''
         # self.comprobateFile() no necesario 
-        with open(ACTIVE_USERS,'w+') as rdf:
+        with open(ACTIVE_USERS,'r+') as rdf:
             if self.comprobateFile(raiseError=False):
-                au = []# se crea una lista vacia
+                au:dict[str,int] = {}# se crea una lista vacia
             else:
-                au = loads(rdf.read())
+                rdf.seek(0)
+                au:dict[str,int] = loads(rdf.read())
             rdf.seek(0)# me muevo a la posicion 0 para
             # sobre escribir todos los datos
-            rdf.write(dumps(au.append(user)))
-        
+            au.update(user)
+            #print(au)
+            rdf.write(dumps(au))
         
 class savePassword:
     def __init__(self,plane_password:bytes,level:int,path:str,salt:bytes,account_id:int) -> None:
@@ -82,11 +86,12 @@ class savePassword:
         resp = self.__levels.get(str(self.__level),None)
         if not(resp):
             raise ValueError('Level security not in Key Dict FATAL ERROR !')
-        return scrypt(self.__password,salt=self.__salt,**resp)
+        return str(self.__account_id) + '$' + self.__salt.hex() + '$' + scrypt(self.__password,salt=self.__salt,**resp).hex() + '\n'
     def savePassword(self):
-        with open(self.__path,'wb') as wbf:
+        with open(self.__path,'a') as wbf:
             wbf.write(self.kdfScrypt())
-            self.saveSalts(account_id=self.__account_id,salt=self.__salt)
+            # old save the salt the sald saves with the kd and a account id
+            #self.saveSalts(account_id=self.__account_id,salt=self.__salt)
     @staticmethod
     def saveSalts(account_id:int,salt:bytes,sep=':') -> None:
         if not(isfile('file_salts.conf')):
@@ -107,5 +112,18 @@ class savePassword:
         else:
             raise NameError('ERROR file_salts.conf does not exists!')
     @staticmethod
-    def search_password():
-        pass
+    def search_password(filePass:str,line_pass:str=1):
+        if not(isfile(filePass)):
+            raise ValueError(f'no existe el archivo {filePass}')
+        else:
+            with open(filePass,'r') as rb:
+                if len(rb.read()) != 1:
+                    rb.seek(0)
+                    res = rb.readlines(line_pass)[0]
+                    #XXX: SOLVE IT print(res)
+            return savePassword.parsePassword(password=res)
+    @staticmethod
+    def parsePassword(password:str,sep:str='$') -> tuple[str | bytes | int]:
+        id_pass,salt,kdf = password.split(sep)
+        return int(id_pass),bytearray.fromhex(salt),kdf.replace('\n','')
+        
