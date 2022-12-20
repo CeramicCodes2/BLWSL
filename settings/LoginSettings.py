@@ -21,7 +21,10 @@ class LoginSettings(BaseModel):
         salt=salt,account_id=v.account_id).savePassword()
         # save the kd password
         return v
-
+class LdLogin(LoginSettings):
+    @classmethod
+    def save_password(cls, v):
+        pass
 class Config:
     __active_users = saveActiveUsers().active_users
     env_prefix = 'LOGINSETTINGS_'
@@ -40,7 +43,7 @@ def createSettingsLoader() -> type:
     dct_users ={
         'Config':Config
         }
-    users = ''.join(x + ':dict[str,str | dict[str,str | int]]\n' for x in saveActiveUsers().active_users.keys())
+    users = ''.join(x + ':dict[str,bool | str | dict[str,str | int]]\n' for x in saveActiveUsers().active_users.keys())
     code = f"""
 {users}
     """

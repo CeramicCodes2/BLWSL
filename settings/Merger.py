@@ -1,29 +1,40 @@
-from json import loads,dumps
+from json import loads,dumps,JSONDecodeError
 from hashlib import scrypt
 from . import PATH,ACTIVE_USERS
 from os.path import isfile
 class save_settings:
-    def __init__(self,dataType,distinct='',format='json',perm='w') -> None:
+    def __init__(self,dataType,distinct='',format='json',operation='w',perm='w',exclude={'user':{'password'},'path':True}) -> None:
         '''
         distinct -> un campo que distinguira uno de otra
         configuracion
         '''
+        self.exclude = exclude
         self.perm = perm 
         self.distinct = distinct
         self.dataType = dataType
-        self.data:str = self.dataType.json(exclude={'user':{'password'},'path':True})
+        self.data:str = self.dataType.json(exclude=self.exclude)
         if format =='json':
             self.save_json()
-        else:
+        elif operation != 'u':
             self.save()
     def save_json(self):
         with open(self.dataType.path,self.perm) as wf:
             # eliminamos el path del esquema
-            wf.write(self.data)   
+            wf.write(self.data)
     def save(self):
         with open(self.dataType.path,self.perm) as wf:
             # eliminamos el path del esquema
             wf.write(f'{self.dataType.__repr_name__()}{self.distinct}={self.data}\n')
+    def update(self,line:int):
+        with open(self.dataType.path,self.perm) as wf:
+            wf.seek(0)
+            buff = wf.readlines()
+            for x,y in enumerate(buff):
+                if x == (line - 1):
+                    buff[x] = f'LoginSettings{self.distinct}={self.data}\n'
+            wf.seek(0)
+            wf.writelines(buff)
+        
     @staticmethod
     def loads(filename,format='json',perm='r') ->dict:
         with open(filename,perm) as rddata:
@@ -50,8 +61,12 @@ class saveActiveUsers:
         read active users
         '''
         with open(ACTIVE_USERS,'r') as rdf: 
-            au = loads(rdf.read())
+            try:
+                au = loads(rdf.read())
+            except JSONDecodeError:
+                au = {}
             self.__active_users = au
+            
         return au
             
     @active_users.setter
@@ -67,7 +82,10 @@ class saveActiveUsers:
                 au:dict[str,int] = {}# se crea una lista vacia
             else:
                 rdf.seek(0)
-                au:dict[str,int] = loads(rdf.read())
+                try:
+                    au:dict[str,int] = loads(rdf.read())
+                except JSONDecodeError:
+                    au = {}
             rdf.seek(0)# me muevo a la posicion 0 para
             # sobre escribir todos los datos
             au.update(user)
