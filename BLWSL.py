@@ -11,6 +11,7 @@ from settings import SL
 from os import environ
 from pydantic import BaseSettings
 from sys import exit
+
 class Main:
     def __init__(self):
         self.__activeUsers = saveActiveUsers().active_users.keys()
@@ -64,9 +65,7 @@ class Main:
             lg = LdLogin.parse_obj(self.configs)
             #js = dumps(self.configs)
             #print(self.settings[self.__user]['user']['account_id'])
-            save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id)
-            
-            
+            save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id) 
     def createNewUser(self,name:str,password:str,scrypt_level_security:int,save_path:str):
         seq = SequenceMerger.parse_file(PATH_SEQUENCES)
         LS = LoginSettings(save_path=save_path,account_locket=False,user=User(account_id=seq.sequences['SQ_ACCOUNT_ID'].nextValue,name=name,password=password,scrypt_level_security=scrypt_level_security,save_path=save_path))
@@ -86,5 +85,7 @@ class Main:
         seq.saveSequence()
 class SecureMode:
     pass
+
 if __name__ == '__main__':
     m = Main()
+    #m.createNewUser(name, password, scrypt_level_security, save_path)

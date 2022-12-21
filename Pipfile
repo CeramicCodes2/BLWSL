@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 matrix-py3 = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
+asciimatics = "*"
 
 [dev-packages]
 

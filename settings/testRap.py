@@ -1,7 +1,7 @@
 # XXX: ES FEISIMO CORREGIR ESTO FUNCIONA PERO ... 
-from pydantic import BaseSettings
-from .Merger import saveActiveUsers
-from . import PATH_LOGIN
+#from pydantic import BaseSettings
+#from .Merger import saveActiveUsers
+#from . import PATH_LOGIN
 #from dotenv import load_dotenv
 #load_dotenv('login.env')
 #config_dct = {
@@ -71,3 +71,27 @@ from . import PATH_LOGIN
 #         dct_users
 #    )
 #    return se
+
+"""from asciimatics.effects import RandomNoise
+from asciimatics.renderers import FigletText, Rainbow
+from asciimatics.scene import Scene
+from asciimatics.screen import Screen
+from asciimatics.exceptions import ResizeScreenError
+import sys
+
+
+def demo(screen):
+    effects = [
+        RandomNoise(screen,
+                    signal=Rainbow(screen,
+                                   FigletText("ASCIIMATICS")))
+    ]
+    screen.play([Scene(effects, -1)], stop_on_resize=True)
+
+
+while True:
+    try:
+        Screen.wrapper(demo)
+        sys.exit(0)
+    except ResizeScreenError:
+        pass"""
