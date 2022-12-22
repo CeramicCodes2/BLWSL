@@ -1,7 +1,7 @@
 # BLWSL
 
     blwsl es un gestor de contrase;as y banner 
-    para wsl,linux y powershell puedes colocar anotanciones
+    para wsl,linux,termux y powershell puedes
     crear usuarios y guardar tus contrase;as en un sitio seguro
 
 para usarlo debes completar una serie de pasos:
@@ -22,11 +22,6 @@ SL.LevelConfig(
     ))
 ss.save()
 ```
-# creacion de un usuario 
-```py
-m = Main()
-m.createNewUser(name, password, scrypt_level_security, save_path)
-```
 # resetear las sequencias
 ```py
 m.resetAllSequences()
@@ -38,4 +33,7 @@ m.resetAllSequences()
 
 ### proximas caracteristicas:
 
+colocar anotaciones
+guardar contrase;as XD
 se adisionara la posivilidad de transferir archivos entre multiples dispositivos
+pertenencia a gladios!
