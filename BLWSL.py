@@ -1,91 +1,67 @@
-# banner of wsl 
-# creacion de un usuario
-from getpass import getpass
-from settings.LoginSettings import LoginSettings,User,createSettingsLoader,LdLogin
-from settings.Merger import save_settings,saveActiveUsers,scrypt,savePassword
-from dotenv import load_dotenv,dotenv_values
-from secrets import compare_digest
-from settings.sequences import SequenceMerger,PATH_SEQUENCES
-from pydantic import SecretBytes
-from settings import SL
-from os import environ
-from pydantic import BaseSettings
-from sys import exit
-
-class Main:
-    def __init__(self):
-        self.__activeUsers = saveActiveUsers().active_users.keys()
-        self.se = createSettingsLoader()()
-        self.settings = self.se.dict()
-    def login(self):
-        self.__user = input('user:')
-        self.__raw_pass = getpass('password:')
-    def loadUserConfigs(self) -> bool:
-            security_level = self.configs['user']['scrypt_level_security']
-            # obtenemos el nivel de seguridad para ajustar los parametros de scrypt
-            security_level = save_settings.loads(r'settings/levels.json')['levels'].get(str(security_level))
-            if not(security_level):
-                raise NameError("el nivel de seguridad asignado no es correcto ...")
-            account_id,salt,kd = savePassword.search_password(filePass=self.configs['user']['save_path'],line_pass=int(self.configs['user']['account_id']))
-            passTry = scrypt(password=bytes(self.__raw_pass,encoding='utf-8'),salt=bytes(salt),**security_level).hex()
-            #passTry = self.__raw_pass
-            
-            return compare_digest(passTry, kd)
-    def logn(self):
-            cc = 1
-            while cc > 0:
-                self.login()
-                if self.loadLoginSession():
-                    res = self.loadUserConfigs()
-                    if not(res):
-                        print('try again! ...')
-                        cc-= 1
-                    else:
-                        print('welcome !')
-                        exit()# enf of the program
-                        break
-            # in other case we lock the account
-            print('too many try`s locking the account ...')
-            self.lockAccount()
-    def loadLoginSession(self):
-        if self.__user in self.__activeUsers:
-            self.configs = self.settings.get(self.__user)
-            if self.configs['account_locket']:
-                print('account locket ...')
-                return False
-            return True
-        else:
-            print('Error unikown user ...')
-            return False
-    def lockAccount(self):
-            #configs['account_locket'] = True
-            self.configs['account_locket'] = True
-            self.configs['user']['password'] = b''# solo agregamos un campo vacio
-            # no se requiere pero es mas facil que crear una clase nueva
-            lg = LdLogin.parse_obj(self.configs)
-            #js = dumps(self.configs)
-            #print(self.settings[self.__user]['user']['account_id'])
-            save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id) 
-    def createNewUser(self,name:str,password:str,scrypt_level_security:int,save_path:str):
-        seq = SequenceMerger.parse_file(PATH_SEQUENCES)
-        LS = LoginSettings(save_path=save_path,account_locket=False,user=User(account_id=seq.sequences['SQ_ACCOUNT_ID'].nextValue,name=name,password=password,scrypt_level_security=scrypt_level_security,save_path=save_path))
-        save_settings(LS,distinct='_' + LS.user.name,format='env',perm='a')
-        saveActiveUsers().active_users = {LS.user.name:LS.user.account_id}
-        seq.saveSequence()
-    def createLevels(self):
-        save_settings(
-        SL.LevelConfig(levels={
-        1:SL.Level(n=16384,r=8,p=1),
-        2:SL.Level(n=1048576,r=8,p=1)}),format='json')
-    def resetAllSequences(self):
-        #m.createNewUser(name='carlos', password=b'password', scrypt_level_security=1, save_path='password.txt')
-        seq = SequenceMerger.parse_file(PATH_SEQUENCES)
-        for key,sequence in seq.sequences.items():
-            sequence.value = 0
-        seq.saveSequence()
-class SecureMode:
-    pass
-
-if __name__ == '__main__':
-    m = Main()
-    #m.createNewUser(name, password, scrypt_level_security, save_path)
+from Model import Model
+from asciimatics.widgets import Frame,Button,Text,Layout,Divider
+from asciimatics.scene import Scene
+from asciimatics.screen import Screen
+from asciimatics.exceptions import ResizeScreenError, NextScene, StopApplication
+from asciimatics.effects import RandomNoise
+from asciimatics.renderers import FigletText
+class MainView(Frame):
+    def __init__(self, screen):
+        super(MainView,self).__init__(screen,
+        #height=screen.height,
+        #width=screen.width * 2 // 2,
+        height=screen.height * 2 // 3,
+        width=screen.width * 2 // 3,
+        hover_focus=True,
+        title="Psec")
+        self.set_theme(theme="green")
+        self._out = ""
+        self._model = Model(out=self._out)
+        end_layout = Layout([30,70])
+        self.add_layout(end_layout)
+        end_layout.add_widget(Text("Status:",self._out,readonly=True),1)
+        layout = Layout([20,80])
+        self.add_layout(layout)
+        layout.add_widget(Divider(height=3,draw_line=False),1)
+        layout.add_widget(Text("User:","user"),1)
+        layout.add_widget(Text("Password:","password",hide_char="*"),1)
+        layout.add_widget(Divider(height=13,draw_line=False),1)
+        layout_buttom = Layout([1,1,1])
+        self.add_layout(layout_buttom)
+        layout_buttom.add_widget(Button("OK",self._ok),0)
+        layout_buttom.add_widget(Button("CANCEL",self._cancel),2)
+        self.fix()
+    def reset(self):
+        # Do standard reset to clear out form, then populate with new data.
+        super(MainView, self).reset()
+    @staticmethod
+    def _cancel():
+        raise StopApplication("User requested exit")
+        #raise NextScene("Main")
+    def _ok(self):
+        if self._model.isLocked:
+            raise StopApplication("User requested exit")
+        self.save()
+        self._model.user = self.data['user']
+        self._model.password = self.data['password']
+        self._model.logn()
+        # guardamos los datos en el cache introducido ahora validaremos
+def demo(screen, scene):
+    scenes = [
+        #Scene([
+        #    RandomNoise(screen,signal=FigletText("Psec",font='poison'))
+        #],300,name='Banner'),
+        Scene([MainView(screen)], -1, name="Main"),
+    ]
+    screen.play(scenes, stop_on_resize=True, start_scene=scene, allow_int=True)
+last_scene = None
+## si se resizea el screen
+## entonces almacenaremos en esta vareable
+## el screen actual para volver a mostrarlo
+#
+while True:
+    try:
+        Screen.wrapper(demo,catch_interrupt=True, arguments=[last_scene])
+        exit(0)
+    except ResizeScreenError as e:
+        last_scene = e.scene
