@@ -5,6 +5,7 @@ from asciimatics.screen import Screen
 from asciimatics.exceptions import ResizeScreenError, NextScene, StopApplication
 from asciimatics.effects import RandomNoise
 from asciimatics.renderers import FigletText
+
 class NewUser(Frame):
     def __init__(self, screen,model):
         super(NewUser,self).__init__(
@@ -32,7 +33,7 @@ class NewUser(Frame):
     def _submit(self):
         self.save()
         data = self.data
-        data['name'] = lower(data['name'])
+        data['name'] = data['name'].lower()
         data['save_path'] = r'D:\scripts\python\BLWSL\password.txt'
         # default path to save the passwords
         self._model.createNewUser(**data)
@@ -87,19 +88,22 @@ class MainView(Frame):
         #self._showMessage('Funcion aun no disponible! ... ')
         raise NextScene('newUser')
     def _ok(self):
-        if self._model.isLocked:
-            raise StopApplication("User requested exit")
+        #if self._model.isLocked:
+        #    raise StopApplication("User requested exit")
         self.save()
         self._model.user = self.data['user']
         self._model.password = self.data['password']
         self._model.logn()
+        #print(self.data)
+        
         self._showMessage(messaje=self._model.out)
         # guardamos los datos en el cache introducido ahora validaremos
+
 def demo(screen, scene):
     scenes = [
-        Scene([
-            RandomNoise(screen,signal=FigletText("BLWSL",font='poison'))
-        ],300,name='Banner'),
+        #Scene([
+        #    RandomNoise(screen,signal=FigletText("BLWSL",font='poison'))
+        #],300,name='Banner'),
         Scene([MainView(screen,model)], -1, name="Main"),
         Scene([NewUser(screen, model)],-1,name='newUser')
     ]

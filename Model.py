@@ -19,6 +19,7 @@ class Model:
         self.settings = self.se.dict()
         self.out =  out
         self.isLocked = False
+        self.__cc = 3
         #self.out_secret = out_secret
         #self._in_secret = in_secret
         #self._input = input_n
@@ -65,7 +66,6 @@ class Model:
             self.out('too many try`s locking the account ...')
             self.lockAccount()"""
     def logn(self):
-        self.__cc = 3
         if self.__cc == 0:
             self.out = 'too many try`s locking the account ...'
             self.lockAccount()
