@@ -17,7 +17,7 @@ class NewUser(Frame):
         self.set_theme('green')
         self._model = model
         #name:str,password:str,scrypt_level_security:int,save_path:str
-        layout = Layout([100])
+        layout = Layout([100],fill_frame=True)
         self.add_layout(layout)
         layout.add_widget(Divider(height=4,draw_line=False),0)
         layout.add_widget(Text(label='name',name='name'),0)
@@ -25,7 +25,7 @@ class NewUser(Frame):
         layout.add_widget(Text(label='level security',name='scrypt_level_security',validator=r'\d'),0)
         exitLayout = Layout([1,1,1,1])
         self.add_layout(exitLayout)
-        exitLayout.add_widget(Divider(draw_line=False,height=8))
+        exitLayout.add_widget(Divider(draw_line=False,height=10))
         exitLayout.add_widget(Button(text='SUBMIT',on_click=self._submit),0)
         exitLayout.add_widget(Button(text='CANCEL',on_click=self._close))
         self.fix()
@@ -58,7 +58,7 @@ class MainView(Frame):
         end_layout = Layout([30,70])
         self.add_layout(end_layout)
         end_layout.add_widget(Text("Status:",'status',readonly=True),1)
-        layout = Layout([20,80])
+        layout = Layout([20,80],fill_frame=True)
         self.add_layout(layout)
         layout.add_widget(Divider(height=3,draw_line=False),1)
         layout.add_widget(Text("User:","user"),1)
