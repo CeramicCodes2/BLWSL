@@ -17,9 +17,9 @@ class Model:
         self.__activeUsers = saveActiveUsers().active_users.keys()
         self.se = createSettingsLoader()()
         self.settings = self.se.dict()
-        self._out =  out
+        self.out =  out
         self.isLocked = False
-        #self._out_secret = out_secret
+        #self.out_secret = out_secret
         #self._in_secret = in_secret
         #self._input = input_n
     """    def login(self):
@@ -55,38 +55,38 @@ class Model:
                 if self.loadLoginSession():
                     res = self.loadUserConfigs()
                     if not(res):
-                        self._out('try again! ...')
+                        self.out('try again! ...')
                         cc-= 1
                     else:
-                        self._out('welcome !')
+                        self.out('welcome !')
                         exit()# enf of the program
                         break
             # in other case we lock the account
-            self._out('too many try`s locking the account ...')
+            self.out('too many try`s locking the account ...')
             self.lockAccount()"""
     def logn(self):
         self.__cc = 3
         if self.__cc == 0:
-            self._out = 'too many try`s locking the account ...'
+            self.out = 'too many try`s locking the account ...'
             self.lockAccount()
             self.isLocked = True
         if self.loadLoginSession():
             res = self.loadUserConfigs()
             if not(res):
-                self._out = 'try again! ...'
+                self.out = 'try again! ...'
                 self.__cc -= 1
             else:
-                self._out = 'welcome !'
+                self.out = 'welcome !'
                 exit(0)
     def loadLoginSession(self):
         if self.__user in self.__activeUsers:
             self.configs = self.settings.get(self.__user)
             if self.configs['account_locket']:
-                self._out = 'account locket ...'
+                self.out = 'account locket ...'
                 return False
             return True
         else:
-            self._out = 'Error unikown user ...'
+            self.out = 'Error unikown user ...'
             return False
     def lockAccount(self):
             #configs['account_locket'] = True
@@ -95,7 +95,7 @@ class Model:
             # no se requiere pero es mas facil que crear una clase nueva
             lg = LdLogin.parse_obj(self.configs)
             #js = dumps(self.configs)
-            #self._out(self.settings[self.__user]['user']['account_id'])
+            #self.out(self.settings[self.__user]['user']['account_id'])
             save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id) 
     def createNewUser(self,name:str,password:str,scrypt_level_security:int,save_path:str):
         seq = SequenceMerger.parse_file(PATH_SEQUENCES)

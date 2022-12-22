@@ -19,7 +19,7 @@ class MainView(Frame):
         self._model = Model(out=self._out)
         end_layout = Layout([30,70])
         self.add_layout(end_layout)
-        end_layout.add_widget(Text("Status:",self._out,readonly=True),1)
+        end_layout.add_widget(Text("Status:",'status',readonly=True),1)
         layout = Layout([20,80])
         self.add_layout(layout)
         layout.add_widget(Divider(height=3,draw_line=False),1)
@@ -45,6 +45,9 @@ class MainView(Frame):
         self._model.user = self.data['user']
         self._model.password = self.data['password']
         self._model.logn()
+        dctCopy = self.data
+        dctCopy['status'] = self._model.out 
+        self.data = dctCopy
         # guardamos los datos en el cache introducido ahora validaremos
 def demo(screen, scene):
     scenes = [
