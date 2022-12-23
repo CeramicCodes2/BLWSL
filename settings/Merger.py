@@ -91,7 +91,10 @@ class saveActiveUsers:
             au.update(user)
             #print(au)
             rdf.write(dumps(au))
-        
+    @active_users.deleter
+    def active_users(self):
+        with open(ACTIVE_USERS,'w') as wf:
+            wf.write('')
 class savePassword:
     def __init__(self,plane_password:bytes,level:int,path:str,salt:bytes,account_id:int) -> None:
         self.__password = plane_password
@@ -144,4 +147,7 @@ class savePassword:
     def parsePassword(password:str,sep:str='$') -> tuple[str | bytes | int]:
         id_pass,salt,kdf = password.split(sep)
         return int(id_pass),bytearray.fromhex(salt),kdf.replace('\n','')
-        
+    @staticmethod
+    def deleteAllPassowrds(FILEPASS:str):
+        with open(FILEPASS,'w') as wf:
+            wf.write('')

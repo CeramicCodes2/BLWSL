@@ -4,7 +4,10 @@ from os import urandom
 from pydantic import validator,ValidationError,BaseSettings
 from .Merger import savePassword,saveActiveUsers
 from . import PATH_LOGIN
-
+def deleteLoginSettings():
+    o = open(PATH_LOGIN,'w')
+    o.write('')
+    o.close()
 class LoginSettings(BaseModel):
     path:str = PATH_LOGIN
     account_locket:bool

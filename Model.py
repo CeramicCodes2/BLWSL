@@ -1,7 +1,7 @@
 # banner of wsl 
 # creacion de un usuario
 from getpass import getpass
-from settings.LoginSettings import LoginSettings,User,createSettingsLoader,LdLogin
+from settings.LoginSettings import LoginSettings,User,createSettingsLoader,LdLogin,deleteLoginSettings
 from settings.Merger import save_settings,saveActiveUsers,scrypt,savePassword
 from dotenv import load_dotenv,dotenv_values
 from secrets import compare_digest
@@ -157,6 +157,11 @@ class Model:
     @isAdmin.setter
     def isAdmin(self,other:bool):
         self.__is_admin = other
+    def deleteAllUsers(self):
+        deleteLoginSettings()
+        #savePassword.deleteAllPassowrds(FILEPASS=)
+        del saveActiveUsers().active_users
+        
 class SecureMode:
     pass
 

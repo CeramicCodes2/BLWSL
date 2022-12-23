@@ -1,17 +1,48 @@
 from Model import Model
-from asciimatics.widgets import Frame,Button,Text,Layout,Divider,ListBox,Widget,Label
+from asciimatics.widgets import Frame,Button,Text,Layout,Divider,ListBox,Widget,Label,PopUpDialog
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
 from asciimatics.exceptions import ResizeScreenError, NextScene, StopApplication
 from asciimatics.effects import RandomNoise,Julia
 from asciimatics.renderers import FigletText
+class basic(Frame):
+    def __init__(self, screen:Screen,model:Model):
+        super(basic,self).__init__(
+            screen,
+            screen.height,
+            screen.width // 3,
+            #y=0,
+            x=0,
+            hover_focus=True,
+            title="Admin Display 2",
+            
+        )
+        self._screen = screen
+        self._model = model
+        # 0 1 and 3 0 for none
+        self.set_theme(theme='green')
+        l = Layout([100])
+        self.add_layout(l)
+        l.add_widget(Button(text='Delete all users',on_click=self._delete))
+        l.add_widget(Button(text='Restart sequences',on_click=self._restart_seq))
+        
+        self.fix()
+    def _delete(self):
+        self._model.deleteAllUsers()
+        self._model.resetAllSequences()
+        raise StopApplication('requested !')
+    def _restart_seq(self):
+        self._model.resetAllSequences()
+        raise StopApplication('requested !')
 class AdminDisplay(Frame):
     def __init__(self, screen:Screen,model:Model):
         super(AdminDisplay,self).__init__(
             screen,
-            height=screen.height * 2 // 3,
+            height=screen.height,
             width=screen.width * 2 // 3,
+            #y=int(screen.height // 3),
+            x=(screen.width // 3),
             hover_focus=True,
             title="Admin Display",
             on_load=self._reloadList
@@ -60,8 +91,7 @@ class AdminDisplay(Frame):
         self._reloadList()
         raise NextScene('AdminDisplay')
     def _returnToMain(self):
-        raise NextScene('Main')
-        
+        raise NextScene('Main')      
 class NewUser(Frame):
     def __init__(self, screen,model):
         super(NewUser,self).__init__(
@@ -169,7 +199,7 @@ def demo(screen:Screen, scene):
             Julia(screen),
             MainView(screen,model)], -1, name="Main"),
         Scene([NewUser(screen, model)],-1,name='newUser'),
-        Scene([AdminDisplay(screen,model)],-1,name='AdminDisplay')
+        Scene([basic(screen, model),AdminDisplay(screen,model)],-1,name='AdminDisplay')
     ]
     #screen._frame 
     screen.play(scenes, stop_on_resize=True, start_scene=scene, allow_int=True)#unhandled_input=shortcuts)
