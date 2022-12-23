@@ -1,11 +1,67 @@
 from Model import Model
-from asciimatics.widgets import Frame,Button,Text,Layout,Divider
+from asciimatics.widgets import Frame,Button,Text,Layout,Divider,ListBox,Widget,Label
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
+from asciimatics.event import KeyboardEvent
 from asciimatics.exceptions import ResizeScreenError, NextScene, StopApplication
-from asciimatics.effects import RandomNoise
+from asciimatics.effects import RandomNoise,Julia
 from asciimatics.renderers import FigletText
-
+class AdminDisplay(Frame):
+    def __init__(self, screen:Screen,model:Model):
+        super(AdminDisplay,self).__init__(
+            screen,
+            height=screen.height * 2 // 3,
+            width=screen.width * 2 // 3,
+            hover_focus=True,
+            title="Admin Display",
+            on_load=self._reloadList
+        )
+        self._model = model
+        #model.updateSettings()
+        self._list_view = ListBox(
+            Widget.FILL_FRAME,
+            model.getAllLocketAccounts(),
+            name="locketUsers",
+            add_scroll_bar=True,
+            on_change=self._on_pick,
+            on_select=self._edit)
+        self.set_theme(theme='green')
+        self._edit_button = Button(text='Enable User',on_click=self._edit)
+        layoutContent = Layout([100],fill_frame=True)
+        self.add_layout(layoutContent)
+        layoutContent.add_widget(Label('Locket users:'))
+        layoutContent.add_widget(Divider(height=2))
+        layoutContent.add_widget(self._list_view)
+        layoutContent.add_widget(Divider(height=1))
+        layoutContent.add_widget(Text(label='Status:',name=self._model.out,readonly=True))
+        layout = Layout([1,1,1,1])
+        self.add_layout(layout)
+        layout.add_widget(self._edit_button,0)
+        layout.add_widget(Button('EXIT',self._exit),3)
+        layout.add_widget(Button('EXIT TO MAIN',self._returnToMain),3)
+        self.fix()
+        self._on_pick()
+        #print(model.getAllLocketAccounts())
+        #layout.add_widget(self._list_view)
+    def _exit(self):
+        raise StopApplication("User requested exit")
+    def _on_pick(self):
+        self._edit_button.disabled = self._list_view.value is None
+        #self._reloadList()
+    def _reloadList(self,*args):
+        self.save()
+        self._model.updateSettings()
+        locket = self._model.getAllLocketAccounts()
+        self._list_view.options = locket
+    def _edit(self):
+        self.save()
+        arg = self.data['locketUsers']
+        self._model.unlockAccount(name=arg['user']['name'])
+        self._reloadList()
+        raise NextScene('AdminDisplay')
+    def _returnToMain(self):
+        raise NextScene('Main')
+        
 class NewUser(Frame):
     def __init__(self, screen,model):
         super(NewUser,self).__init__(
@@ -28,7 +84,7 @@ class NewUser(Frame):
         self.add_layout(exitLayout)
         exitLayout.add_widget(Divider(draw_line=False,height=10))
         exitLayout.add_widget(Button(text='SUBMIT',on_click=self._submit),0)
-        exitLayout.add_widget(Button(text='CANCEL',on_click=self._close))
+        exitLayout.add_widget(Button(text='CANCEL',on_click=self._close),0)
         self.fix()
     def _submit(self):
         self.save()
@@ -37,6 +93,8 @@ class NewUser(Frame):
         data['save_path'] = r'D:\scripts\python\BLWSL\password.txt'
         # default path to save the passwords
         self._model.createNewUser(**data)
+        self._model.updateSettings()
+        #print(self._model.settings)
         raise NextScene('Main')
     @classmethod
     def _close(self):
@@ -68,8 +126,8 @@ class MainView(Frame):
         layout_buttom = Layout([1,1,1])
         self.add_layout(layout_buttom)
         layout_buttom.add_widget(Button("OK",self._ok),0)
-        layout_buttom.add_widget(Button("CREATE NEW USER",self._newUser),1)
-        layout_buttom.add_widget(Button("CANCEL",self._cancel),2)
+        layout_buttom.add_widget(Button("CREATE NEW USER",self._newUser),2)
+        #layout_buttom.add_widget(Button("CANCEL",self._cancel),2)
         self.fix()
     def reset(self):
         # Do standard reset to clear out form, then populate with new data.
@@ -93,21 +151,28 @@ class MainView(Frame):
         self.save()
         self._model.user = self.data['user']
         self._model.password = self.data['password']
-        self._model.logn()
-        #print(self.data)
-        
+        rsp = self._model.logn()
         self._showMessage(messaje=self._model.out)
+        if self._model.isAdmin and rsp:
+            #print(self._model.isAdmin)
+            raise NextScene('AdminDisplay')
+        if rsp:
+            raise StopApplication("User requested exit")
+        #raise StopApplication("User requested exit")
         # guardamos los datos en el cache introducido ahora validaremos
-
-def demo(screen, scene):
+def demo(screen:Screen, scene):
     scenes = [
         #Scene([
         #    RandomNoise(screen,signal=FigletText("BLWSL",font='poison'))
         #],300,name='Banner'),
-        Scene([MainView(screen,model)], -1, name="Main"),
-        Scene([NewUser(screen, model)],-1,name='newUser')
+        Scene([
+            Julia(screen),
+            MainView(screen,model)], -1, name="Main"),
+        Scene([NewUser(screen, model)],-1,name='newUser'),
+        Scene([AdminDisplay(screen,model)],-1,name='AdminDisplay')
     ]
-    screen.play(scenes, stop_on_resize=True, start_scene=scene, allow_int=True)
+    #screen._frame 
+    screen.play(scenes, stop_on_resize=True, start_scene=scene, allow_int=True)#unhandled_input=shortcuts)
 last_scene = None
 model = Model(out='')
 ## si se resizea el screen
@@ -120,3 +185,5 @@ while True:
         exit(0)
     except ResizeScreenError as e:
         last_scene = e.scene
+#BUG: AL CREAR UN NUEVO USUARIO DEBE SER NECESARIO RECARGAR EL PROGRAMA PARA QUE 
+# NO TIRE EL ERROR USUARIO DESCONOCIDO ...

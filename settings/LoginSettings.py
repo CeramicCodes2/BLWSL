@@ -22,9 +22,9 @@ class LoginSettings(BaseModel):
         # save the kd password
         return v
 class LdLogin(LoginSettings):
-    @classmethod
+    @validator('user')
     def save_password(cls, v):
-        pass
+        return v
 class Config:
     __active_users = saveActiveUsers().active_users
     env_prefix = 'LOGINSETTINGS_'

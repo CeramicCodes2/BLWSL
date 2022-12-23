@@ -10,6 +10,7 @@ class User(BaseModel):
     password:SecretBytes#plaine text password
     save_path:str
     scrypt_level_security:int
+    is_admin:bool
     __levels = save_settings.loads(PATH)['levels']
     @validator('password')
     def validate_password(cls,v):
