@@ -30,10 +30,19 @@ class save_settings:
             wf.seek(0)
             buff = wf.readlines()
             for x,y in enumerate(buff):
-                if x == (line - 1):
+                if x == (line):
                     buff[x] = f'LoginSettings{self.distinct}={self.data}\n'
             wf.seek(0)
             wf.writelines(buff)
+    def delete(self):
+        with open(self.dataType.path,self.perm) as wf:
+            wf.seek(0)
+            buff = wf.readlines()
+        with open(self.dataType.path,'w') as wf:
+            wf.seek(0)
+            for x,y in enumerate(buff):
+                if not(x == (self.dataType.user.account_id)):
+                    wf.writelines(y)
         
     @staticmethod
     def loads(filename,format='json',perm='r') ->dict:
@@ -151,3 +160,11 @@ class savePassword:
     def deleteAllPassowrds(FILEPASS:str):
         with open(FILEPASS,'w') as wf:
             wf.write('')
+    @staticmethod
+    def deletePassword(FILEPASS:str,account_id:int):
+        with open(FILEPASS,'r+') as wf:
+            buffer = wf.readlines()
+        with open(FILEPASS,'w') as wf:
+            for s,x in enumerate(buffer):
+                if not(s == account_id):
+                    wf.write(x)

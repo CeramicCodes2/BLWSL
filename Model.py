@@ -21,6 +21,7 @@ class Model:
         self.isLocked = False
         self.__cc = 0
         self.__is_admin =  False
+        self.__userSelected = None
         self.__str2bool = lambda x: True if x == 'True' else False
         #self.out_secret = out_secret
         #self._in_secret = in_secret
@@ -28,6 +29,17 @@ class Model:
     """    def login(self):
         self.__user = self._input('user:')
         self.__raw_pass = self._in_secret('password:')"""
+    @property
+    def userSelected(self):
+        return self.__userSelected
+    @userSelected.setter
+    def userSelected(self,dct:dict):
+        '''
+        this property will be uset 
+        if the user select a user in a list box
+        '''
+        self.__userSelected = dct
+        #self.updateUser(dct)
     def getcc(self):
         return self.__cc
     def loadUserConfigs(self) -> bool:
@@ -111,6 +123,10 @@ class Model:
         #js = dumps(self.configs)
         #self.out(self.settings[self.__user]['user']['account_id'])
         save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id) 
+    def updateUser(self,configs:dict):
+        configs['user']['password'] = b''
+        lg = LdLogin.parse_obj(configs)
+        save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id)
     def updateSettings(self) -> None:
         """
             this mehthod will update the self.settings dict 
@@ -131,6 +147,8 @@ class Model:
         lg = LdLogin.parse_obj(user)
         save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id)
         self.updateSettings()
+    def getAllUsers(self) -> list[str]:
+        return [ (x,y) for x,y in self.settings.items()]
     def getAllLocketAccounts(self) -> list[str]:
         ''' return`s the users where account_locket is True '''
         return [ (x,y) for x,y in self.settings.items() if y['account_locket'] == True]
@@ -161,7 +179,25 @@ class Model:
         deleteLoginSettings()
         #savePassword.deleteAllPassowrds(FILEPASS=)
         del saveActiveUsers().active_users
-        
+    def deleteUser(self):
+        # delete from the login.env
+        configs = self.userSelected
+        configs['user']['password'] = b''
+        lg = LdLogin.parse_obj(configs)
+        save_settings(lg,perm='r+',operation='u',format='env').delete()
+        # delete from the active.json
+        au = saveActiveUsers()
+        cpy = au.active_users
+        # guardamos una copia de los ususarios originales
+        # eliminamos el ususario a eliminar
+        del cpy[lg.user.name]
+        # guardamos
+        # eliminamos el active users
+        del au.active_users
+        # creamos uno nuevo sin el ususario
+        au.active_users = cpy
+        # delete from the passwords.txt
+        savePassword.deletePassword(lg.user.save_path,lg.user.account_id)
 class SecureMode:
     pass
 
