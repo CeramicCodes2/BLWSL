@@ -22,6 +22,7 @@ class AcountInfo(Frame):
         )
         self.__str2bool = lambda x: True if x in ('True','true') else False
         self._model = model 
+        self._screen = screen
         self._tiName = Text(label='Name',name='name')
         self._tiLvlSec = Text(label='Level Security',name='scrypt_level_security',readonly=True)
         self._tiLock = RadioButtons(options=[('true',True),('false',False)],label='is locked',name='account_locket')#validator=self.__str2bool)
@@ -33,6 +34,7 @@ class AcountInfo(Frame):
         self._bDelete = Button(text='Delete', on_click=self._delete)
         layout = Layout([10,90],fill_frame=True)
         self.add_layout(layout)
+        layout.add_widget(Divider(draw_line=False,height=3),1)
         layout.add_widget(self._tiName,1)
         layout.add_widget(Divider(draw_line=False),1)
         layout.add_widget(self._tiLvlSec,1)
@@ -74,7 +76,6 @@ class AcountInfo(Frame):
         configs = self._model.userSelected
         oldName = configs['user']['name']
         configs['user']['name'] = dta['name']
-        
         configs['user']['scrypt_level_security'] = dta['scrypt_level_security']
         configs['user']['is_admin'] = dta['is_admin']
         configs['account_locket'] = dta['account_locket']
@@ -135,7 +136,7 @@ class UsersDisplay(Frame):
         self.add_layout(l2)
         l2.add_widget(self._bedit,0)
         l2.add_widget(Button('Exit',self._exit),3)
-        l2.add_widget(Button('Return to admin',self._returnToAdmin),1)
+        l2.add_widget(Button('RTA',self._returnToAdmin),1)
         l2.add_widget(self._bduser,2)
         #self.add_layout(layout
         # )
@@ -159,15 +160,15 @@ class UsersDisplay(Frame):
         self._model.userSelected = se
         self._model.deleteUser()
         self._load_list()
-        raise NextScene("UsersDisplay")
-        pass
+        self._model.updateSettings()
+        raise NextScene('UsersDisplay')
     def _exit(self):
         raise StopApplication('Stop application')
     def _returnToAdmin(self):
         raise NextScene('AdminDisplay')
     def _on_pick(self):
-        self._bedit.disabled = self._list_view is None
-        self._bduser.disabled = self._list_view is None
+        self._bedit.disabled = self._list_view.value is None
+        self._bduser.disabled = self._list_view.value is None
     def _load_list(self):
         self.save()
         self._list_view.options = self._model.getAllUsers()
@@ -404,7 +405,8 @@ def demo(screen:Screen, scene):
         Scene([basic(screen, model),AdminDisplay(screen,model)],-1,name='AdminDisplay'),
         Scene([UsersDisplay(screen, model)],-1,name='UsersDisplay'),#UsersDisplay(screen, model),
         #AnimeGril(screen, model),
-        Scene([AcountInfo(screen,model)],-1,name='Info')
+        Scene([Julia(screen)
+            ,AcountInfo(screen,model)],-1,name='Info')
     ]
     """
 Print(screen,
