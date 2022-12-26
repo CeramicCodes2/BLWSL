@@ -1,6 +1,7 @@
 from json import loads,dumps,JSONDecodeError
 from hashlib import scrypt
-from . import PATH,ACTIVE_USERS
+from . import PATH,ACTIVE_USERS,PATH_DEFAULT_PHOTO
+# importamos DEFAULT_PHOTO AQUI PARA PDOER IMPORTAR EN EL MODEL
 from os.path import isfile
 class save_settings:
     def __init__(self,dataType,distinct='',format='json',operation='w',perm='w',exclude={'user':{'password'},'path':True}) -> None:

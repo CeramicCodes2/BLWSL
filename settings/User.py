@@ -11,7 +11,7 @@ class User(BaseModel):
     save_path:str
     scrypt_level_security:int
     is_admin:bool
-    #photo:str
+    photo:str
     __levels = save_settings.loads(PATH)['levels']
     @validator('password')
     def validate_password(cls,v):

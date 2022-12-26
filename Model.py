@@ -2,13 +2,13 @@
 # creacion de un usuario
 from getpass import getpass
 from settings.LoginSettings import LoginSettings,User,createSettingsLoader,LdLogin,deleteLoginSettings
-from settings.Merger import save_settings,saveActiveUsers,scrypt,savePassword
+from settings.Merger import save_settings,saveActiveUsers,scrypt,savePassword,isfile,PATH_DEFAULT_PHOTO
 from dotenv import load_dotenv,dotenv_values
 from secrets import compare_digest
 from settings.sequences import SequenceMerger,PATH_SEQUENCES
 from pydantic import SecretBytes
 from settings import SL
-from os import environ
+#from os import environ
 from pydantic import BaseSettings
 from sys import exit
 
@@ -173,9 +173,14 @@ class Model:
     def getAllLocketAccounts(self) -> list[str]:
         ''' return`s the users where account_locket is True '''
         return [ (x,y) for x,y in self.settings.items() if y['account_locket'] == True]
-    def createNewUser(self,name:str,password:str,scrypt_level_security:int,save_path:str,is_admin:bool=False):
+    @staticmethod
+    def validatePhoto(photo:str) -> str:
+        if photo == '' or not(isfile(photo)):
+            return PATH_DEFAULT_PHOTO# default profile photo
+        return photo
+    def createNewUser(self,name:str,password:str,scrypt_level_security:int,save_path:str,is_admin:bool=False,photo:str=''):
         seq = SequenceMerger.parse_file(PATH_SEQUENCES)
-        LS = LoginSettings(save_path=save_path,account_locket=False,user=User(account_id=seq.sequences['SQ_ACCOUNT_ID'].nextValue,name=name,password=password,scrypt_level_security=scrypt_level_security,save_path=save_path,is_admin=is_admin))
+        LS = LoginSettings(save_path=save_path,account_locket=False,user=User(account_id=seq.sequences['SQ_ACCOUNT_ID'].nextValue,name=name,password=password,scrypt_level_security=scrypt_level_security,save_path=save_path,is_admin=is_admin,photo=self.validatePhoto(photo)))
         save_settings(LS,distinct='_' + LS.user.name,format='env',perm='a')
         saveActiveUsers().active_users = {LS.user.name:LS.user.account_id}
         seq.saveSequence()

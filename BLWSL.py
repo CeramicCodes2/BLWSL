@@ -2,6 +2,7 @@ from Model import Model
 from asciimatics.widgets import Frame,Button,Text,Layout,Divider,Widget,Label,ListBox
 from asciimatics.widgets.radiobuttons import RadioButtons
 from asciimatics.widgets.popupdialog import PopUpDialog
+from asciimatics.widgets.filebrowser import FileBrowser
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
@@ -90,20 +91,17 @@ class AnimeGril(Print):
     def __init__(self,screen:Screen,image:str):
         super(AnimeGril,self).__init__(
             screen,
-
             ColourImageFile(screen, 
                             image,
-                            height=screen.height,
+                            height=int(screen.height * 0.60),
                             uni=True,
                             dither=True,
                             fill_background=True
                             ),
-            y=0,
-            x=int(screen.width * 0.01),
+            y=int(screen.height * 0.10),
+            x=int(screen.width * 0.05),
             stop_frame=0 
             )
-            
-        
 class UsersDisplay(Frame):
     def __init__(self, screen,model:Model):
         super(UsersDisplay,self).__init__(
@@ -123,6 +121,7 @@ class UsersDisplay(Frame):
             on_change=self._on_pick,
             on_select=self._set_user
             )
+        self._sceneImage = None
         self._bedit = Button(text='Edit',on_click=self._edit)
         self._bduser = Button('Delete User',self._delete_user)
         self.set_theme(theme='green')
@@ -146,7 +145,14 @@ class UsersDisplay(Frame):
         self.save()
         selection:dict[str,str] = self.data['usersInfo']
         # valor seleccionado
-        self._model.userSelected = selection  
+        self._model.userSelected = selection
+        # removemos la imagen del ususario anterior para que no se encimen 
+        if self._sceneImage:
+            self._scene.remove_effect(self._sceneImage)
+        self._sceneImage = AnimeGril(self._screen, selection['user']['photo'])
+        self._scene.add_effect(self._sceneImage)
+        
+        raise NextScene("UsersDisplay")
     def _delete_user(self):
         self.save()
         se:dict[str,str] = self.data['usersInfo']
@@ -284,12 +290,17 @@ class NewUser(Frame):
         self.set_theme('green')
         self._model = model
         #name:str,password:str,scrypt_level_security:int,save_path:str
-        layout = Layout([100],fill_frame=True)
+        layout = Layout([100])
         self.add_layout(layout)
         layout.add_widget(Divider(height=4,draw_line=False),0)
         layout.add_widget(Text(label='name',name='name'),0)
         layout.add_widget(Text(label='password',name='password',hide_char=' '),0)
         layout.add_widget(Text(label='level security',name='scrypt_level_security',validator=r'\d'),0)
+        layoutB = Layout([100],fill_frame=True)
+        self.add_layout(layoutB)
+        layout.add_widget(Divider(draw_line=False,height=2))
+        layoutB.add_widget(Label(label='Photo:'))
+        layoutB.add_widget(FileBrowser(height=Widget.FILL_FRAME,root='',name='photo'),0)
         exitLayout = Layout([1,1,1,1])
         self.add_layout(exitLayout)
         exitLayout.add_widget(Divider(draw_line=False,height=10))
@@ -310,7 +321,14 @@ class NewUser(Frame):
             raise NextScene('Main')
         self._scene.add_effect(PopUpDialog(self._screen,text="USER ALREADY REGISTRED!",buttons=['OK']))
         #raise NextScene('Main')
-    
+    def process_event(self, event):
+        # Do the key handling for this Frame.
+        if isinstance(event, KeyboardEvent):
+            if event.key_code in [ Screen.ctrl("v")]:
+                print('hiii')
+
+        # Now pass on to lower levels for normal handling of the event.
+        return super(NewUser, self).process_event(event)
     def _close(self):
         raise NextScene('Main')
     def reset(self):
@@ -384,7 +402,12 @@ def demo(screen:Screen, scene):
             MainView(screen,model)], -1, name="Main"),
         Scene([NewUser(screen, model)],-1,name='newUser'),
         Scene([basic(screen, model),AdminDisplay(screen,model)],-1,name='AdminDisplay'),
-        Scene([Print(screen,
+        Scene([UsersDisplay(screen, model)],-1,name='UsersDisplay'),#UsersDisplay(screen, model),
+        #AnimeGril(screen, model),
+        Scene([AcountInfo(screen,model)],-1,name='Info')
+    ]
+    """
+Print(screen,
                   ColourImageFile(screen, 
                                   r'D:\scripts\python\BLWSL\settings\death2.jpg',
                                   height=screen.height,
@@ -395,9 +418,8 @@ def demo(screen:Screen, scene):
                   y=0,
                   x=int(screen.width * 0.01),
                   stop_frame=0 
-                  ),UsersDisplay(screen, model)],-1,name='UsersDisplay'),#UsersDisplay(screen, model),
-        Scene([AcountInfo(screen,model)],-1,name='Info')
-    ]
+                  )
+    """
     #screen._frame 
     screen.play(scenes, stop_on_resize=True, start_scene=scene, allow_int=True)#unhandled_input=shortcuts)
 last_scene = None
