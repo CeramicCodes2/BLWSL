@@ -1,16 +1,13 @@
 from Model import Model
-from asciimatics.widgets import Frame,Button,Text,Layout,Divider,ListBox,Widget,Label
+from asciimatics.widgets import Frame,Button,Text,Layout,Divider,Widget,Label,ListBox
+from asciimatics.widgets.radiobuttons import RadioButtons
+from asciimatics.widgets.popupdialog import PopUpDialog
 from asciimatics.scene import Scene
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
 from asciimatics.exceptions import ResizeScreenError, NextScene, StopApplication
 from asciimatics.effects import RandomNoise,Julia,Print
 from asciimatics.renderers import ColourImageFile,FigletText
-def _blink():
-    if random.random() > 0.9:
-        return 0
-    else:
-        return 1
 class AcountInfo(Frame):
     def __init__(self, screen,model):
         super(AcountInfo,self).__init__(
@@ -26,35 +23,43 @@ class AcountInfo(Frame):
         self._model = model 
         self._tiName = Text(label='Name',name='name')
         self._tiLvlSec = Text(label='Level Security',name='scrypt_level_security',readonly=True)
-        self._tiLock = Text(label='is locked',name='account_locket',validator=self.__str2bool)
-        self._tiAdmin = Text(label='is admin',name='is_admin',validator=self.__str2bool)
+        self._tiLock = RadioButtons(options=[('true',True),('false',False)],label='is locked',name='account_locket')#validator=self.__str2bool)
+        self._tiAdmin = RadioButtons(label='is admin',name='is_admin',options=[('true',True),('false',False)])
         self._fill_values()
         self.set_theme(theme='green')
         # buttons ly2
         self._bEdit = Button(text='Edit',on_click=self._edit)
         self._bDelete = Button(text='Delete', on_click=self._delete)
-        layout = Layout([100],fill_frame=True)
+        layout = Layout([10,90],fill_frame=True)
         self.add_layout(layout)
-        layout.add_widget(self._tiName)
-        layout.add_widget(self._tiLvlSec)
-        layout.add_widget(self._tiLock)
-        layout.add_widget(self._tiAdmin)
-        layout.add_widget(Divider(height=3),0)
+        layout.add_widget(self._tiName,1)
+        layout.add_widget(Divider(draw_line=False),1)
+        layout.add_widget(self._tiLvlSec,1)
+        layout.add_widget(Divider(draw_line=False),1)
+        layout.add_widget(self._tiLock,1)
+        layout.add_widget(Divider(draw_line=False),1)
+        layout.add_widget(self._tiAdmin,1)
+        layout.add_widget(Divider(height=3,draw_line=False))
         ly2 = Layout([1,1,1,1])
         self.add_layout(ly2)
         ly2.add_widget(self._bEdit,0)
         #ly2.add_widget(self._bDelete,1)
+        ly2.add_widget(Divider(draw_line=False,height=3))
+        ly2.add_widget(Button(text='Return to Admin',on_click=self._return2Admin),2)
         ly2.add_widget(Button(text='Exit',on_click=self._exit),3)
+        ly2.add_widget(Divider(draw_line=False,height=3))
         self.fix()
         self._on_pick()
+    def _return2Admin(self):
+        raise NextScene('AdminDisplay')
     def _fill_values(self):
         #print(self._model.userSelected)
         if self._model.userSelected != None:
             configs = self._model.userSelected
             self._tiName.value = configs['user'][self._tiName.name]
             self._tiLvlSec.value = configs['user'][self._tiLvlSec.name]
-            self._tiLock.value = str(configs[self._tiLock.name])#bool2str
-            self._tiAdmin.value = str(configs['user'][self._tiAdmin.name])
+            self._tiLock.value = configs[self._tiLock.name]
+            self._tiAdmin.value = configs['user'][self._tiAdmin.name]
         else:
             self._tiName.value = 'NO DATA ...'
     def _on_pick(self):
@@ -66,11 +71,16 @@ class AcountInfo(Frame):
         self.save()
         dta = self.data
         configs = self._model.userSelected
+        oldName = configs['user']['name']
         configs['user']['name'] = dta['name']
+        
         configs['user']['scrypt_level_security'] = dta['scrypt_level_security']
+        configs['user']['is_admin'] = dta['is_admin']
         configs['account_locket'] = dta['account_locket']
-        configs['is_admin'] = dta['is_admin']
         self._model.updateUser(configs)
+        if oldName != dta['name']:
+            self._model.updateActiveUser(oldName, dta['name'])
+            # checamos si se actualizo el nombre de ususario
         #raise NextScene('Info')
     def _delete(self):
         pass
@@ -270,6 +280,7 @@ class NewUser(Frame):
             hover_focus=True,
             title="newUser"
         )
+        self._screen = screen
         self.set_theme('green')
         self._model = model
         #name:str,password:str,scrypt_level_security:int,save_path:str
@@ -288,14 +299,18 @@ class NewUser(Frame):
     def _submit(self):
         self.save()
         data = self.data
-        data['name'] = data['name'].lower()
-        data['save_path'] = r'D:\scripts\python\BLWSL\password.txt'
-        # default path to save the passwords
-        self._model.createNewUser(**data)
-        self._model.updateSettings()
-        #print(self._model.settings)
-        raise NextScene('Main')
-    @classmethod
+        # comporbamos si nombre no existe como usuario
+        if not(data['name'] in self._model.getActiveUsers()):
+            data['name'] = data['name'].lower()
+            data['save_path'] = r'password.txt'
+            # default path to save the passwords
+            self._model.createNewUser(**data)
+            self._model.updateSettings()
+            #print(self._model.settings)
+            raise NextScene('Main')
+        self._scene.add_effect(PopUpDialog(self._screen,text="USER ALREADY REGISTRED!",buttons=['OK']))
+        #raise NextScene('Main')
+    
     def _close(self):
         raise NextScene('Main')
     def reset(self):

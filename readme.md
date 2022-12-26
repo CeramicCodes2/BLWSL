@@ -37,3 +37,11 @@ colocar anotaciones
 guardar contrase;as XD
 se adisionara la posivilidad de transferir archivos entre multiples dispositivos
 pertenencia a gladios!
+
+## POR HACER
+* A;ADIR INSTALADOR PARA MAC WINDOWS Y LINUX
+## EN PROCESO
+* A;ADIR FOTO DE PERFIL PARA LOS USUSARIOS
+
+## HECHO 
+* ELIMINAR RUTAS QUE AFECTAN EL FUNCIONAMIENTO EN LINUX

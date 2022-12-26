@@ -26,6 +26,8 @@ class Model:
         #self.out_secret = out_secret
         #self._in_secret = in_secret
         #self._input = input_n
+    def getActiveUsers(self):
+        return self.__activeUsers
     """    def login(self):
         self.__user = self._input('user:')
         self.__raw_pass = self._in_secret('password:')"""
@@ -127,6 +129,25 @@ class Model:
         configs['user']['password'] = b''
         lg = LdLogin.parse_obj(configs)
         save_settings(lg,perm='r+',format='env',distinct='_' + lg.user.name,operation='u').update(lg.user.account_id)
+    def updateActiveUser(sel,oldName,newName):
+        oldUsers = saveActiveUsers().active_users
+        if oldUsers.get(oldName):
+            # checamos si el ususario si existe 
+            usrVal = oldUsers[oldName]
+            # eliminamos vieja entrada
+            del oldUsers[oldName]
+            # creamos una nueva entrada
+            oldUsers[newName] = usrVal
+            # guardamos
+            sact = saveActiveUsers()
+            # eliminamos todos los usuarios actuales
+            del sact.active_users
+            # actializamos con el nuevo diccionario
+            sact.active_users = oldUsers
+        else:
+            self._out = 'UNIKOWN USER'
+            
+            
     def updateSettings(self) -> None:
         """
             this mehthod will update the self.settings dict 

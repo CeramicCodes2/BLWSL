@@ -28,9 +28,11 @@ class save_settings:
     def update(self,line:int):
         with open(self.dataType.path,self.perm) as wf:
             wf.seek(0)
-            buff = wf.readlines()
+            buff:list = wf.readlines()
+            # removemos espacios
+            #buff = [ unspace for line in buff for unspace in line.split()]
             for x,y in enumerate(buff):
-                if x == (line):
+                if x == (line -1):
                     buff[x] = f'LoginSettings{self.distinct}={self.data}\n'
             wf.seek(0)
             wf.writelines(buff)
