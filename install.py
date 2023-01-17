@@ -5,8 +5,9 @@ from os.path import isfile,join
 from os import getuid,getcwd
 import ctypes
 class Install:
-    __workPath = join(getcwd(),'')
-    def is_admin():
+    def __init__(self):
+        self.__workPath = join(getcwd(),'')
+    def is_admin(self):
         is_admin = False
         try:
             is_admin = getuid() == 0
@@ -16,11 +17,11 @@ class Install:
         except AttributeError:
             is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
         return is_admin
-    def raiseOnAdmin():
+    def raiseOnAdmin(self):
         '''
         comprueba si somos administradores, si no lo somos lanzara un error
         '''
-        if not(Install.is_admin()):
+        if not(self.is_admin()):
             raise NameError('No se tienen permisos de administrador para ejecutar esta operacion \n Error.')
 class Win32:
     def __init__(self):
@@ -34,7 +35,7 @@ class Linux:
         Install().raiseOnAdmin()
         # escribiremos al final del bashrc una linea para ejecutar el banner 
         self._BASHRC = join('~','./bashrc')
-        if not(isfile(BASHRC)):
+        if not(isfile(self.BASHRC)):
             raise NameError('[-] UBCF -> UNIKOWN UBICATION OF BASHRC')
         self.svCopy()
         self.BASHRC = f'python {join(getcwd(),"BLWSL.py")}'# escribimos el archivo del bashrc
