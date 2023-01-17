@@ -43,12 +43,12 @@ class Linux:
         '''getter'''
         with open(self._BASHRC,'r') as rds:
             return rds.read()
-    @_BASHRC.setter
+    @BASHRC.setter
     def BASHRC(self,arg:str):
         ''' write data in the bashrc file'''
         with open(self._BASHRC,'a') as fle:
             fle.write(arg)
-    @_BASHRC.deleter
+    @BASHRC.deleter
     def BASHRC(self):
         ''' restauramos a la forma original '''
         with open(self._BASHRC + 'cpy','r') as rds:
