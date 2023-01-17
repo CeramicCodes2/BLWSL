@@ -34,8 +34,8 @@ class Linux:
     def __init__(self):
         Install().raiseOnAdmin()
         # escribiremos al final del bashrc una linea para ejecutar el banner 
-        self._BASHRC = join('~','./bashrc')
-        if not(isfile(self.BASHRC)):
+        self._BASHRC = join('.bashrc')#'~',
+        if not(isfile(self._BASHRC)):
             raise NameError('[-] UBCF -> UNIKOWN UBICATION OF BASHRC')
         self.svCopy()
         self.BASHRC = f'python {join(getcwd(),"BLWSL.py")}'# escribimos el archivo del bashrc
@@ -58,7 +58,7 @@ class Linux:
     def svCopy(self):
         ''' guarda una copia del bashrc '''
         with open(self._BASHRC,'r') as rds:
-            with open(self._BASHRC + 'cpy','r') as wdf:
+            with open(self._BASHRC + 'cpy','w') as wdf:
                 wdf.write(rds.read())
             
         
