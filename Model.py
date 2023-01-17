@@ -180,7 +180,9 @@ class Model:
         return photo
     def createNewUser(self,name:str,password:str,scrypt_level_security:int,save_path:str,is_admin:bool=False,photo:str=''):
         seq = SequenceMerger.parse_file(PATH_SEQUENCES)
-        LS = LoginSettings(save_path=save_path,account_locket=False,user=User(account_id=seq.sequences['SQ_ACCOUNT_ID'].nextValue,name=name,password=password,scrypt_level_security=scrypt_level_security,save_path=save_path,is_admin=is_admin,photo=self.validatePhoto(photo)))
+        LS = LoginSettings(save_path=save_path,account_locket=True,user=User(account_id=seq.sequences['SQ_ACCOUNT_ID'].nextValue,name=name,password=password,scrypt_level_security=scrypt_level_security,save_path=save_path,is_admin=is_admin,photo=self.validatePhoto(photo)))
+        # lock the new user, so an admin need to unlock for use the account
+        
         save_settings(LS,distinct='_' + LS.user.name,format='env',perm='a')
         saveActiveUsers().active_users = {LS.user.name:LS.user.account_id}
         seq.saveSequence()

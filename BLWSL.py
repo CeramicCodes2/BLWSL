@@ -178,7 +178,6 @@ class UsersDisplay(Frame):
         # valor seleccionado
         self._model.userSelected = selection
         raise NextScene("Info")
-        
 class basic(Frame):
     def __init__(self, screen:Screen,model:Model):
         super(basic,self).__init__(
@@ -393,7 +392,7 @@ class MainView(Frame):
             raise StopApplication("User requested exit")
         #raise StopApplication("User requested exit")
         # guardamos los datos en el cache introducido ahora validaremos
-def demo(screen:Screen, scene):
+def run(screen:Screen, scene):
     scenes = [
         #Scene([
         #    RandomNoise(screen,signal=FigletText("BLWSL",font='poison'))
@@ -432,7 +431,7 @@ model = Model(out='')
 #
 while True:
     try:
-        Screen.wrapper(demo,catch_interrupt=True, arguments=[last_scene])
+        Screen.wrapper(run,catch_interrupt=True, arguments=[last_scene])
         exit(0)
     except ResizeScreenError as e:
         last_scene = e.scene
